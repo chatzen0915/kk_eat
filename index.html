@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日菜單管理系統 - JSON 版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .menu-card { transition: all 0.3s ease; }
+        .hidden-section { display: none; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- 導航欄 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-emerald-600 flex items-center">
+                <i class="fas fa-book-open mr-2"></i> 每日食譜清單
+            </h1>
+            <button id="adminToggle" class="text-sm bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-full transition">
+                <i class="fas fa-edit mr-1"></i> 編輯模式
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- 日期導航 -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-8 flex flex-wrap items-center justify-between gap-4 border border-slate-100">
+            <div class="flex items-center gap-3">
+                <label for="datePicker" class="font-medium text-slate-500">查看日期：</label>
+                <input type="date" id="datePicker" class="border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+            <button id="todayBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-lg font-medium transition flex items-center">
+                回到今天
+            </button>
+        </div>
+
+        <!-- 內容顯示區 -->
+        <div id="displaySection">
+            <div id="menuContent" class="space-y-6">
+                <div class="text-center py-20 text-slate-400">
+                    <div class="animate-bounce mb-4"><i class="fas fa-spinner fa-spin text-3xl"></i></div>
+                    <p>正在載入菜單資料...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 管理編輯區 (產生 JSON 用) -->
+        <div id="adminSection" class="hidden-section bg-white rounded-2xl shadow-lg p-6 border-2 border-emerald-100 mt-8">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-emerald-700">管理中心</h2>
+                    <p class="text-xs text-slate-400 mt-1">編輯後請複製 JSON 代碼並存入 menu_data.json</p>
+                </div>
+                <button id="closeAdmin" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="font-bold text-slate-600 border-b pb-2">編輯當日資料</h3>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">菜色名稱</label>
+                        <input type="text" id="inputDishName" class="w-full border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">食材 (逗號隔開)</label>
+                        <textarea id="inputIngredients" rows="3" class="w-full border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">圖片網址</label>
+                        <input type="text" id="inputImageUrl" class="w-full border border-slate-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="updateLocal" class="flex-1 bg-emerald-500 text-white font-bold py-2 rounded-lg hover:bg-emerald-600 transition">暫存修改</button>
+                        <button id="deleteLocal" class="bg-red-50 text-red-500 px-4 py-2 rounded-lg hover:bg-red-100">刪除</button>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="font-bold text-slate-600 border-b pb-2">匯出 JSON</h3>
+                    <p class="text-xs text-slate-400">當您完成所有日期的編輯後，請點擊下方按鈕：</p>
+                    <textarea id="jsonOutput" readonly class="w-full h-32 bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-mono text-slate-600"></textarea>
+                    <button id="copyJson" class="w-full bg-slate-800 text-white font-bold py-3 rounded-lg hover:bg-slate-900 transition flex items-center justify-center">
+                        <i class="fas fa-copy mr-2"></i> 複製 JSON 代碼
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-xl transition-all opacity-0 pointer-events-none z-50 text-sm"></div>
+
+    <script>
+        let menuData = {};
+        const datePicker = document.getElementById('datePicker');
+        const menuContent = document.getElementById('menuContent');
+        const jsonOutput = document.getElementById('jsonOutput');
+
+        // 初始化日期
+        datePicker.value = new Date().toISOString().split('T')[0];
+
+        // 1. 從 JSON 檔案讀取資料
+        async function loadMenuData() {
+            try {
+                const response = await fetch('./menu_data.json');
+                if (!response.ok) throw new Error('找不到 menu_data.json');
+                menuData = await response.json();
+                renderMenu(datePicker.value);
+                updateJsonOutput();
+            } catch (error) {
+                console.error(error);
+                renderEmpty(datePicker.value, "尚未建立菜單檔案，請使用編輯模式新增。");
+                menuData = {};
+            }
+        }
+
+        function renderMenu(date) {
+            const data = menuData[date];
+            if (!data) {
+                renderEmpty(date);
+                return;
+            }
+
+            const ingredients = data.ingredients.split(/[,，]/).map(i => 
+                `<span class="inline-block bg-white text-emerald-700 px-3 py-1 rounded-full text-sm font-medium mr-2 mb-2 shadow-sm border border-emerald-100">${i.trim()}</span>`
+            ).join('');
+
+            menuContent.innerHTML = `
+                <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 overflow-hidden border border-slate-100 animate-in fade-in duration-500">
+                    ${data.imageUrl ? `<img src="${data.imageUrl}" class="w-full h-72 object-cover" onerror="this.style.display='none'">` : ''}
+                    <div class="p-8">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded uppercase">Daily Choice</span>
+                            <p class="text-slate-400 text-xs font-medium">${date}</p>
+                        </div>
+                        <h2 class="text-4xl font-extrabold text-slate-800 mb-8">${data.name}</h2>
+                        <div class="bg-emerald-50/50 p-6 rounded-2xl">
+                            <h3 class="font-bold text-emerald-800/60 text-[10px] uppercase tracking-widest mb-4">食材清單 Ingredients</h3>
+                            <div class="flex flex-wrap">${ingredients}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEmpty(date, customMsg) {
+            menuContent.innerHTML = `
+                <div class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-200 text-slate-400">
+                    <div class="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-utensils text-xl text-slate-300"></i>
+                    </div>
+                    <p class="text-lg font-medium">這一天 (${date}) 沒有菜單</p>
+                    <p class="text-xs mt-1 text-slate-300">${customMsg || '請切換日期或開啟編輯模式新增內容'}</p>
+                </div>
+            `;
+        }
+
+        // 管理邏輯
+        function updateJsonOutput() {
+            jsonOutput.value = JSON.stringify(menuData, null, 4);
+        }
+
+        document.getElementById('updateLocal').addEventListener('click', () => {
+            const date = datePicker.value;
+            const name = document.getElementById('inputDishName').value;
+            const ingredients = document.getElementById('inputIngredients').value;
+            const imageUrl = document.getElementById('inputImageUrl').value;
+
+            if (!name || !ingredients) return showToast("請完整填寫菜名與食材", "bg-red-500");
+
+            menuData[date] = { name, ingredients, imageUrl };
+            renderMenu(date);
+            updateJsonOutput();
+            showToast("暫存成功！請記得複製下方 JSON 並存檔。");
+        });
+
+        document.getElementById('deleteLocal').addEventListener('click', () => {
+            delete menuData[datePicker.value];
+            renderMenu(datePicker.value);
+            updateJsonOutput();
+            showToast("已刪除該日暫存資料");
+        });
+
+        document.getElementById('copyJson').addEventListener('click', () => {
+            jsonOutput.select();
+            document.execCommand('copy');
+            showToast("JSON 已複製！請貼上到 menu_data.json 檔案。");
+        });
+
+        // UI 切換與事件
+        datePicker.addEventListener('change', () => {
+            renderMenu(datePicker.value);
+            if (!adminSection.classList.contains('hidden-section')) syncAdminForm();
+        });
+
+        document.getElementById('todayBtn').addEventListener('click', () => {
+            datePicker.value = new Date().toISOString().split('T')[0];
+            renderMenu(datePicker.value);
+        });
+
+        document.getElementById('adminToggle').addEventListener('click', () => {
+            const admin = document.getElementById('adminSection');
+            admin.classList.toggle('hidden-section');
+            if (!admin.classList.contains('hidden-section')) {
+                syncAdminForm();
+                admin.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        function syncAdminForm() {
+            const date = datePicker.value;
+            document.getElementById('editingDate').innerText = date;
+            const data = menuData[date] || { name: '', ingredients: '', imageUrl: '' };
+            document.getElementById('inputDishName').value = data.name;
+            document.getElementById('inputIngredients').value = data.ingredients;
+            document.getElementById('inputImageUrl').value = data.imageUrl;
+        }
+
+        function showToast(msg, color = "bg-slate-800") {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.className = `fixed bottom-8 left-1/2 -translate-x-1/2 ${color} text-white px-6 py-3 rounded-full shadow-2xl opacity-100 z-50 transition-all`;
+            setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 3000);
+        }
+
+        document.getElementById('closeAdmin').addEventListener('click', () => {
+            document.getElementById('adminSection').classList.add('hidden-section');
+        });
+
+        // 啟動載入
+        loadMenuData();
+    </script>
+</body>
+</html>
