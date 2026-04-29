@@ -260,11 +260,14 @@
                             </div>
                         </div>
                         <h2 class="text-xl font-black text-slate-800 mb-4">${dish.name || '未命名菜色'}</h2>
-                        <div class="flex flex-wrap">${ingredients || '<span class="text-slate-300 text-xs italic">無指定食材</span>'}</div>
+                        <div class="mb-2">
+                            <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">${dish.isExternal ? '店家名稱' : '食材'}</h3>
+                            <div class="flex flex-wrap">${ingredients || '<span class="text-slate-300 text-xs italic">無資料</span>'}</div>
+                        </div>
                     </div>
                     <div class="p-4 ${dish.isExternal ? 'bg-amber-50/30' : 'bg-slate-50'} border-t border-slate-50">
                         <button onclick="toggleNotes(${i})" class="flex items-center justify-between w-full text-xs font-bold ${dish.isExternal ? 'text-amber-700/60 hover:text-amber-700' : 'text-slate-500 hover:text-emerald-600'} transition-colors focus:outline-none">
-                            <span><i class="fas fa-lightbulb mr-2 opacity-50"></i>查看食譜備註</span>
+                            <span><i class="fas fa-lightbulb mr-2 opacity-50"></i>${dish.isExternal ? '查看備註' : '查看食譜備註'}</span>
                             <i id="chevron-${i}" class="fas fa-chevron-down transition-transform"></i>
                         </button>
                         <div id="notes-${i}" class="recipe-notes-container">
@@ -293,7 +296,6 @@
             dishEditorList.innerHTML = dishes.map((dish, i) => `
                 <div class="bg-white p-6 rounded-2xl border-2 transition-all relative ${dish.isExternal ? 'bg-amber-50/30 border-amber-400 shadow-md' : 'border-slate-200 shadow-sm'}">
                     
-                    <!-- 改良後的外食按鈕：位於左邊界線上，與其他按鈕風格一致 -->
                     <button onclick="toggleExternal(${i})" title="切換外食模式" class="absolute top-1/2 -left-5 -translate-y-1/2 w-10 h-10 rounded-full border-2 transition-all flex flex-col items-center justify-center gap-0.5 z-10 ${dish.isExternal ? 'bg-amber-500 border-amber-600 text-white shadow-lg btn-external-active' : 'bg-white border-slate-200 text-slate-400 hover:border-emerald-500 hover:text-emerald-500 shadow-sm'}">
                         <i class="fas fa-store text-[14px]"></i>
                         <span class="text-[8px] font-black leading-none">${dish.isExternal ? '外食' : '外食'}</span>
@@ -327,12 +329,12 @@
                             <input type="text" value="${dish.name || ''}" oninput="syncDish(${i}, 'name', this.value)" placeholder="請輸入菜名..." class="w-full border border-slate-100 bg-slate-50 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <div class="md:col-span-4">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">食材</label>
-                            <input type="text" value="${dish.ingredients || ''}" oninput="syncDish(${i}, 'ingredients', this.value)" placeholder="雞蛋、胡蘿蔔......" class="w-full border border-slate-100 bg-slate-50 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">${dish.isExternal ? '店家名稱' : '食材'}</label>
+                            <input type="text" value="${dish.ingredients || ''}" oninput="syncDish(${i}, 'ingredients', this.value)" placeholder="${dish.isExternal ? '請輸入店名...' : '雞蛋、胡蘿蔔......'}" class="w-full border border-slate-100 bg-slate-50 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <div class="md:col-span-4">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">食譜備註</label>
-                            <textarea oninput="syncDish(${i}, 'notes', this.value)" rows="3" placeholder="詳細步驟..." class="w-full border border-slate-100 bg-slate-50 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">${dish.notes || ''}</textarea>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">${dish.isExternal ? '備註' : '食譜備註'}</label>
+                            <textarea oninput="syncDish(${i}, 'notes', this.value)" rows="3" placeholder="${dish.isExternal ? '店家資訊、餐點心得或價格...' : '詳細步驟...'}" class="w-full border border-slate-100 bg-slate-50 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">${dish.notes || ''}</textarea>
                         </div>
                     </div>
                 </div>
