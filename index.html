@@ -110,7 +110,15 @@
     <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none z-50 text-sm transition-all"></div>
 
     <script>
-        const todayStr = new Date().toISOString().split('T')[0];
+        // 修正：使用在地時間取得 YYYY-MM-DD，避免 UTC 導致的換日延遲問題
+        const getLocalDateString = (date = new Date()) => {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        };
+
+        const todayStr = getLocalDateString();
         const categoryIcons = {
             '主食': 'fa-bowl-rice',
             '配菜': 'fa-stroopwafel',
@@ -293,7 +301,7 @@
         function modifyDate(days) {
             const current = new Date(datePicker.value);
             current.setDate(current.getDate() + days);
-            datePicker.value = current.toISOString().split('T')[0];
+            datePicker.value = getLocalDateString(current);
             renderAll(datePicker.value);
         }
 
