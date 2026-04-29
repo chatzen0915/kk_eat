@@ -1,7 +1,10 @@
 {
-    "2026-04-29": {
-        "name": "焗烤馬鈴薯",
-        "ingredients": "馬鈴薯, 起司",
-        "imageUrl": ""
-    }
+    "2026-04-30": [
+        {
+            "category": "主食",
+            "name": "",
+            "ingredients": "",
+            "notes": ""
+        }
+    ]
 }
