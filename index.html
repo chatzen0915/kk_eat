@@ -27,12 +27,18 @@
             transition: max-height 0.5s ease-in, opacity 0.3s ease;
         }
         
-        /* 卡片佈局優化：確保高度自適應，防止浮空跑版 */
+        /* 使用 Columns 佈局徹底解決展開時的浮空與跑版問題 */
+        .masonry-grid {
+            column-gap: 1.5rem;
+        }
+        @media (min-width: 768px) { .masonry-grid { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+        
         .dish-card {
-            display: flex;
-            flex-direction: column;
-            height: fit-content;
-            align-self: start;
+            break-inside: avoid; /* 防止卡片被欄位切斷 */
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            width: 100%;
         }
     </style>
 </head>
@@ -52,7 +58,7 @@
 
     <main class="max-w-5xl mx-auto px-4 py-8">
         
-        <!-- 日期導覽 -->
+        <!-- 日期導航 -->
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-8 flex flex-wrap items-center justify-between gap-4 border border-slate-100">
             <div class="flex items-center gap-2">
                 <button id="prevDayBtn" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-2 rounded-lg transition flex items-center">
@@ -73,7 +79,7 @@
 
         <!-- 內容顯示區 -->
         <div id="displaySection">
-            <div id="menuContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+            <div id="menuContent" class="masonry-grid">
                 <!-- 菜色清單會動態插入這裡 -->
             </div>
         </div>
@@ -87,7 +93,7 @@
                 </div>
                 <div class="flex gap-2">
                     <button id="autoSortBtn" class="text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-full transition border border-slate-200">
-                        <i class="fas fa-sort-amount-down-alt mr-1"></i> 按類別排序
+                        <i class="fas fa-sort-amount-down-alt mr-1"></i> 按預設分類排序
                     </button>
                     <button id="closeAdmin" class="text-slate-400 hover:text-slate-600 p-2"><i class="fas fa-times text-xl"></i></button>
                 </div>
@@ -100,12 +106,12 @@
                         <!-- 動態生成多組輸入框 -->
                     </div>
                     
-                    <div class="flex gap-3">
-                        <button id="addDishBtn" class="flex-[2] py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center gap-2">
+                    <div class="space-y-3">
+                        <button id="addDishBtn" class="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center gap-2">
                             <i class="fas fa-plus-circle"></i> 新增一道菜色
                         </button>
-                        <button id="pasteDishBtn" class="hidden flex-1 py-4 bg-orange-50 border-2 border-dashed border-orange-200 rounded-2xl text-orange-500 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center gap-2 font-bold">
-                            <i class="fas fa-paste"></i> 貼上菜色
+                        <button id="pasteDishBtn" class="hidden w-full py-4 bg-orange-50 border-2 border-dashed border-orange-200 rounded-2xl text-orange-500 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center gap-2 font-bold">
+                            <i class="fas fa-paste"></i> 貼上暫存菜色
                         </button>
                     </div>
                 </div>
@@ -114,7 +120,7 @@
                 <div class="lg:col-span-1">
                     <div class="sticky top-24">
                         <h3 class="font-bold text-slate-600 mb-4 flex items-center justify-between">
-                            雙向編輯 JSON
+                            雙向編輯 JSON (自動日期排序)
                             <span id="syncIndicator" class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded transition-all">Auto Sync</span>
                         </h3>
                         <textarea id="jsonOutput" class="w-full h-[500px] bg-slate-900 border border-slate-800 rounded-2xl p-4 text-[11px] font-mono text-emerald-400 shadow-inner resize-none focus:ring-2 focus:ring-emerald-500 outline-none" spellcheck="false"></textarea>
@@ -145,7 +151,7 @@
             '配菜': 'fa-stroopwafel',
             '湯品': 'fa-mug-hot',
             '甜點': 'fa-ice-cream',
-            '霄夜': 'fa-moon',
+            '宵夜': 'fa-moon',
             '其他': 'fa-utensils'
         };
 
@@ -154,7 +160,7 @@
             '配菜': 2,
             '湯品': 3,
             '甜點': 4,
-            '霄夜': 5,
+            '宵夜': 5,
             '其他': 6
         };
 
@@ -197,6 +203,7 @@
             renderAll(datePicker.value);
         }
 
+        // 修改：讓自動排序成為手動觸發功能
         function performAutoSort(date) {
             if (menuData[date] && Array.isArray(menuData[date])) {
                 menuData[date].sort((a, b) => {
@@ -217,20 +224,18 @@
         function renderDisplay(date) {
             const dishes = menuData[date] || [];
             if (dishes.length === 0) {
-                menuContent.className = "block text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-100 text-slate-300";
-                menuContent.innerHTML = `<i class="fas fa-cookie-bite text-3xl mb-4"></i><p>這一天 (${date}) 還沒有排餐喔！</p>`;
+                menuContent.innerHTML = `<div class="col-span-full text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-100 text-slate-300"><i class="fas fa-cookie-bite text-3xl mb-4"></i><p>這一天 (${date}) 還沒有排餐喔！</p></div>`;
                 return;
             }
 
-            menuContent.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start";
             menuContent.innerHTML = dishes.map((dish, i) => {
                 const ingredients = (dish.ingredients || "").split(/[、,，]/).filter(s => s.trim()).map(s => 
                     `<span class="inline-block bg-white text-emerald-700 px-2 py-1 rounded-md text-[10px] font-bold mr-1 mb-1 border border-emerald-100 shadow-sm">${s.trim()}</span>`
                 ).join('');
 
                 return `
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 flex flex-col overflow-hidden animate-in fade-in duration-300 dish-card">
-                    <div class="p-6 flex-1">
+                <div class="dish-card bg-white rounded-3xl shadow-sm border border-slate-100 flex flex-col overflow-hidden animate-in fade-in duration-300">
+                    <div class="p-6">
                         <div class="flex justify-between items-start mb-4">
                             <span class="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-1 rounded">
                                 <i class="fas ${categoryIcons[dish.category] || 'fa-utensils'} mr-1"></i> ${dish.category}
@@ -239,7 +244,7 @@
                         <h2 class="text-xl font-black text-slate-800 mb-4">${dish.name || '未命名菜色'}</h2>
                         <div class="flex flex-wrap">${ingredients || '<span class="text-slate-300 text-xs italic">無指定食材</span>'}</div>
                     </div>
-                    <div class="p-4 bg-slate-50 border-t border-slate-50 mt-auto">
+                    <div class="p-4 bg-slate-50 border-t border-slate-50">
                         <button onclick="toggleNotes(${i})" class="flex items-center justify-between w-full text-xs font-bold text-slate-500 hover:text-emerald-600 transition-colors focus:outline-none">
                             <span><i class="fas fa-lightbulb mr-2 opacity-50"></i>查看食譜備註</span>
                             <i id="chevron-${i}" class="fas fa-chevron-down transition-transform"></i>
@@ -372,7 +377,14 @@
         });
 
         function updateJsonOutput() {
-            jsonOutput.value = JSON.stringify(menuData, null, 4);
+            // 自動按日期排序輸出 JSON
+            const sortedKeys = Object.keys(menuData).sort();
+            const sortedMenuData = {};
+            sortedKeys.forEach(key => {
+                sortedMenuData[key] = menuData[key];
+            });
+            
+            jsonOutput.value = JSON.stringify(sortedMenuData, null, 4);
             syncIndicator.className = "text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded";
             syncIndicator.innerText = "Auto Sync";
         }
@@ -421,7 +433,7 @@
         document.getElementById('copyJson').addEventListener('click', () => {
             jsonOutput.select();
             document.execCommand('copy');
-            showToast("JSON 代碼已複製並保存您的自定義順序！");
+            showToast("JSON 代碼已按日期排序並複製成功！");
         });
 
         function showToast(msg) {
