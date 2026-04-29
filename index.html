@@ -119,6 +119,7 @@
         };
 
         const todayStr = getLocalDateString();
+        
         const categoryIcons = {
             '主食': 'fa-bowl-rice',
             '配菜': 'fa-stroopwafel',
@@ -126,6 +127,16 @@
             '甜點': 'fa-ice-cream',
             '飲料': 'fa-glass-water',
             '其他': 'fa-utensils'
+        };
+
+        // 定義類別優先權 (越小越前面)
+        const categoryPriority = {
+            '主食': 1,
+            '配菜': 2,
+            '湯': 3,
+            '甜點': 4,
+            '飲料': 5,
+            '其他': 6
         };
 
         // 預設範例資料
@@ -159,19 +170,31 @@
                 const response = await fetch(`menu_data.json?t=${Date.now()}`);
                 if (response.ok) {
                     const fetchedData = await response.json();
-                    // 合併資料
                     menuData = { ...menuData, ...fetchedData };
                 }
             } catch (e) { console.warn("使用預設範例。"); }
             renderAll(datePicker.value);
         }
 
+        // 輔助函式：針對特定日期進行排序
+        function sortMenuByPriority(date) {
+            if (menuData[date] && Array.isArray(menuData[date])) {
+                menuData[date].sort((a, b) => {
+                    const pA = categoryPriority[a.category] || 99;
+                    const pB = categoryPriority[b.category] || 99;
+                    return pA - pB;
+                });
+            }
+        }
+
         // 渲染畫面
         function renderAll(date) {
-            // 重要：如果該日期還沒有資料，先預設為空陣列，這樣 JSON 輸出才會出現該日期
             if (!menuData[date]) {
                 menuData[date] = [];
             }
+            
+            // 每次渲染前進行排序
+            sortMenuByPriority(date);
             
             renderDisplay(date);
             renderAdmin(date);
@@ -241,7 +264,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="md:col-span-1">
                             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">類別</label>
-                            <select oninput="syncDish(${i}, 'category', this.value)" class="w-full border border-slate-100 bg-slate-50 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            <select onchange="syncDish(${i}, 'category', this.value, true)" class="w-full border border-slate-100 bg-slate-50 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                                 ${Object.keys(categoryIcons).map(c => `<option value="${c}" ${dish.category === c ? 'selected' : ''}>${c}</option>`).join('')}
                             </select>
                         </div>
@@ -267,14 +290,21 @@
         }
 
         // 同步函數
-        window.syncDish = (index, field, value) => {
+        // needSort 參數：當類別變動時，需要重新排序列清單以保持一致性
+        window.syncDish = (index, field, value, needSort = false) => {
             const date = datePicker.value;
-            if (!menuData[date]) menuData[date] = [];
-            if (!menuData[date][index]) return;
+            if (!menuData[date] || !menuData[date][index]) return;
             
             menuData[date][index][field] = value;
-            renderDisplay(date); // 同步更新預覽
-            updateJsonOutput();  // 同步更新 JSON 區塊
+            
+            if (needSort) {
+                // 如果是改類別，重新渲染整個清單以顯示正確順序
+                renderAll(date);
+            } else {
+                // 一般文字輸入只同步 JSON 與 預覽，不重排 (避免輸入時焦點跑掉)
+                renderDisplay(date);
+                updateJsonOutput();
+            }
         };
 
         window.removeDish = (index) => {
@@ -282,7 +312,6 @@
             if (!menuData[date]) return;
             
             menuData[date].splice(index, 1);
-            // 保持 Key 存在，讓 JSON 輸出仍顯示該日期
             renderAll(date);
         };
 
@@ -294,6 +323,8 @@
         });
 
         function updateJsonOutput() {
+            // 在輸出 JSON 前確保目前日期的順序是正確的
+            sortMenuByPriority(datePicker.value);
             jsonOutput.value = JSON.stringify(menuData, null, 4);
         }
 
@@ -329,7 +360,7 @@
         document.getElementById('copyJson').addEventListener('click', () => {
             jsonOutput.select();
             document.execCommand('copy');
-            showToast("JSON 代碼已複製！請存回 menu_data.json");
+            showToast("JSON 代碼已複製並按順序排列！");
         });
 
         function showToast(msg) {
