@@ -74,7 +74,8 @@
                 <button id="prevDayBtn" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-2 rounded-lg transition flex items-center">
                     <i class="fas fa-chevron-left mr-1"></i> 前一天
                 </button>
-                <button id="todayBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition flex items-center">
+                <!-- 初始移除 bg-emerald-500，交由 JS 控制動態樣式 -->
+                <button id="todayBtn" class="px-4 py-2 rounded-lg font-medium transition flex items-center">
                     今天
                 </button>
                 <button id="nextDayBtn" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-2 rounded-lg transition flex items-center">
@@ -129,8 +130,8 @@
                 <!-- 右側：JSON 輸出與雙向編輯 -->
                 <div class="lg:col-span-1">
                     <div class="sticky top-24">
-                        <h3 class="font-bold text-slate-600 mb-4 flex items-center justify-between">
-                            雙向編輯 JSON (自動日期排序)
+                        <h3 class="font-bold text-slate-600 mb-4 flex items-center justify-between text-sm">
+                            雙向編輯 JSON
                             <span id="syncIndicator" class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded transition-all">Auto Sync</span>
                         </h3>
                         <textarea id="jsonOutput" class="w-full h-[500px] bg-slate-900 border border-slate-800 rounded-2xl p-4 text-[11px] font-mono text-emerald-400 shadow-inner resize-none focus:ring-2 focus:ring-emerald-500 outline-none" spellcheck="false"></textarea>
@@ -145,7 +146,8 @@
         </div>
     </main>
 
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none z-50 text-sm transition-all"></div>
+    <!-- 已將 toast 移至右下角 (bottom-8 right-8) -->
+    <div id="toast" class="fixed bottom-8 right-8 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none z-50 text-sm transition-all"></div>
 
     <script>
         const getLocalDateString = (date = new Date()) => {
@@ -201,6 +203,7 @@
         const dishEditorList = document.getElementById('dishEditorList');
         const jsonOutput = document.getElementById('jsonOutput');
         const syncIndicator = document.getElementById('syncIndicator');
+        const todayBtn = document.getElementById('todayBtn');
         
         datePicker.value = todayStr;
 
@@ -225,8 +228,19 @@
             }
         }
 
+        // 更新「今天」按鈕樣式
+        function updateTodayBtnStyle(date) {
+            if (date === todayStr) {
+                todayBtn.className = "px-4 py-2 rounded-lg font-medium transition flex items-center bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-100";
+            } else {
+                todayBtn.className = "px-4 py-2 rounded-lg font-medium transition flex items-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 shadow-sm";
+            }
+        }
+
         function renderAll(date) {
             if (!menuData[date]) menuData[date] = [];
+            
+            updateTodayBtnStyle(date);
             renderDisplay(date);
             renderAdmin(date);
             updateJsonOutput();
@@ -474,7 +488,7 @@
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.innerText = msg;
-            t.className = `fixed bottom-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-6 py-3 rounded-full shadow-2xl opacity-100 z-50 transition-all pointer-events-auto`;
+            t.className = `fixed bottom-8 right-8 bg-emerald-600 text-white px-6 py-3 rounded-full shadow-2xl opacity-100 z-50 transition-all pointer-events-auto`;
             setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2500);
         }
 
