@@ -286,10 +286,16 @@
             });
         }
 
+        // 修正：針對「週一至週日」週期的跳轉邏輯
         window.jumpToDayInWeek = (targetDay) => {
             const current = new Date(datePicker.value);
-            const currentDay = current.getDay();
-            const diff = targetDay - currentDay;
+            const currentDay = current.getDay(); // 0(SUN) to 6(SAT)
+            
+            // 將原本 JS 的 0(SUN) 改為 7，以便計算週一(1)到週日(7)的距離
+            const currentAdjusted = currentDay === 0 ? 7 : currentDay;
+            const targetAdjusted = targetDay === 0 ? 7 : targetDay;
+            
+            const diff = targetAdjusted - currentAdjusted;
             current.setDate(current.getDate() + diff);
             
             const newDateStr = getLocalDateString(current);
@@ -342,9 +348,9 @@
                     `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-black rounded-md flex items-center gap-1"><i class="fas fa-store"></i>外食</span>` 
                     : '';
 
-                // 修改：一般菜色改為淡綠色底 bg-emerald-50/50，並強化邊框
+                // 修改：強化卡片背景與對比度
                 return `
-                <div class="dish-card rounded-[2rem] shadow-sm border ${dish.isExternal ? 'bg-amber-50 border-amber-200 ring-2 ring-amber-100/20 shadow-amber-100' : 'bg-emerald-50/50 border-emerald-100 shadow-emerald-100/50'} flex flex-col overflow-hidden animate-in fade-in duration-500">
+                <div class="dish-card rounded-[2rem] shadow-md border ${dish.isExternal ? 'bg-amber-50 border-amber-200 ring-2 ring-amber-100/20 shadow-amber-100' : 'bg-emerald-50 border-emerald-100 shadow-emerald-100/30'} flex flex-col overflow-hidden animate-in fade-in duration-500">
                     <div class="p-7">
                         <div class="flex justify-between items-start mb-5">
                             <div class="flex items-center">
