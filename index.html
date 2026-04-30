@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>kk_eat - 每日食譜管理</title>
+    <title>kk_eat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -29,18 +29,22 @@
             transition: max-height 0.5s ease-in, opacity 0.3s ease;
         }
         
-        /* 使用 Columns 佈局徹底解決展開時的浮空與跑版問題 */
-        .masonry-grid {
-            column-gap: 1.5rem;
+        /* 使用 Grid 佈局並確保項目對齊頂部，防止點開食譜時導致其他項目跳位 */
+        .dish-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            align-items: start; /* 關鍵：確保每一行從頂部開始，不隨鄰居拉長 */
         }
-        @media (min-width: 768px) { .masonry-grid { column-count: 2; } }
-        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+        @media (min-width: 768px) { .dish-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1024px) { .dish-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         
         .dish-card {
-            break-inside: avoid;
-            margin-bottom: 1.5rem;
-            display: inline-block;
+            display: flex;
+            flex-direction: column;
             width: 100%;
+            height: auto;
+            align-self: start; /* 確保單張卡片不會被 row 強制拉長 */
         }
 
         /* 外食按鈕閃爍效果 */
@@ -53,7 +57,7 @@
             100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
         }
 
-        /* JSON 編輯器樣式：修正底色與文字衝突 */
+        /* JSON 編輯器樣式 */
         #jsonOutput {
             font-family: 'Fira Code', monospace;
             white-space: pre;
@@ -61,7 +65,7 @@
             overflow-x: hidden;
         }
         .json-highlight-block {
-            background-color: rgba(255, 255, 255, 0.08); /* 改成深灰色透明底，避免與綠字糊在一起 */
+            background-color: rgba(255, 255, 255, 0.08); 
             display: block;
             width: calc(100% + 2rem);
             margin-left: -1rem;
@@ -79,7 +83,7 @@
             <h1 class="text-xl font-bold text-emerald-600 flex items-center">
                 <i class="fas fa-utensils mr-2"></i> kk_eat
             </h1>
-            <button id="adminToggle" class="text-sm bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-full transition">
+            <button id="adminToggle" class="text-sm bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-full transition font-medium">
                 <i class="fas fa-cog mr-1"></i> 編輯模式
             </button>
         </div>
@@ -102,13 +106,13 @@
             </div>
             <div class="flex items-center gap-3">
                 <label for="datePicker" class="font-medium text-slate-500 text-sm">查看日期：</label>
-                <input type="date" id="datePicker" class="border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none text-sm">
+                <input type="date" id="datePicker" class="border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-medium">
             </div>
         </div>
 
-        <!-- 內容顯示區 -->
+        <!-- 內容顯示區 (改回穩定 Grid) -->
         <div id="displaySection">
-            <div id="menuContent" class="masonry-grid">
+            <div id="menuContent" class="dish-grid">
                 <!-- 菜色清單會動態插入這裡 -->
             </div>
         </div>
@@ -124,7 +128,7 @@
                     <button id="autoSortBtn" class="text-xs bg-white text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-full transition border border-slate-200">
                         <i class="fas fa-sort-amount-down-alt mr-1"></i> 按預設分類排序
                     </button>
-                    <button id="closeAdmin" class="text-slate-400 hover:text-slate-600 p-2"><i class="fas fa-times text-xl"></i></button>
+                    <button id="closeAdmin" class="text-slate-400 hover:text-slate-600 p-2 transition-transform hover:scale-110"><i class="fas fa-times text-xl"></i></button>
                 </div>
             </div>
             
@@ -136,7 +140,7 @@
                     </div>
                     
                     <div class="flex gap-3">
-                        <button id="addDishBtn" class="flex-[2] py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center gap-2 font-bold">
+                        <button id="addDishBtn" class="flex-[2] py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center gap-2 font-bold bg-white/50">
                             <i class="fas fa-plus-circle"></i> 新增一道菜色
                         </button>
                         <button id="pasteDishBtn" class="hidden flex-1 py-4 bg-orange-50 border-2 border-dashed border-orange-200 rounded-2xl text-orange-500 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center gap-2 font-bold">
@@ -148,14 +152,16 @@
                 <!-- 右側：JSON 輸出與雙向編輯 -->
                 <div class="lg:col-span-1">
                     <div class="sticky top-24">
-                        <h3 class="font-bold text-slate-600 mb-4 flex items-center justify-between text-sm">
-                            雙向編輯 JSON
-                            <span id="syncIndicator" class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded transition-all font-mono tracking-tighter">Auto Sync</span>
-                        </h3>
-                        <div id="jsonOutput" contenteditable="plaintext-only" class="w-full h-[550px] bg-slate-900 border border-slate-800 rounded-2xl p-4 text-[11px] font-mono text-emerald-400 shadow-inner overflow-y-auto focus:ring-2 focus:ring-emerald-500 outline-none scroll-smooth" spellcheck="false"></div>
-                        <div class="flex gap-2 mt-4">
-                            <button id="copyJson" class="flex-1 bg-emerald-600 text-white font-bold py-4 rounded-2xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 flex items-center justify-center">
-                                <i class="fas fa-copy mr-2"></i> 複製全部 JSON
+                        <div class="bg-white rounded-2xl p-1 shadow-sm border border-slate-100">
+                            <h3 class="font-bold text-slate-600 p-4 pb-2 flex items-center justify-between text-sm">
+                                雙向編輯 JSON
+                                <span id="syncIndicator" class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded transition-all font-mono tracking-tighter">Auto Sync</span>
+                            </h3>
+                            <div id="jsonOutput" contenteditable="plaintext-only" class="w-full h-[500px] bg-slate-900 border-none rounded-b-2xl p-4 text-[11px] font-mono text-emerald-400 shadow-inner overflow-y-auto focus:ring-0 outline-none scroll-smooth" spellcheck="false"></div>
+                        </div>
+                        <div class="mt-4">
+                            <button id="copyJson" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 flex items-center justify-center gap-2">
+                                <i class="fas fa-copy"></i> 複製全部 JSON
                             </button>
                         </div>
                     </div>
@@ -164,7 +170,7 @@
         </div>
     </main>
 
-    <div id="toast" class="fixed bottom-8 right-8 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none z-50 text-sm transition-all"></div>
+    <div id="toast" class="fixed bottom-8 right-8 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none z-50 text-sm transition-all font-bold"></div>
 
     <script>
         const getLocalDateString = (date = new Date()) => {
@@ -251,20 +257,15 @@
             }
         }
 
-        // 新增：Google Maps 連結優化偵測
         function formatNotesWithLinks(text) {
             if (!text) return "主廚還沒寫下備註...";
-            
-            // Regex 偵測 Google Maps 連結
             const mapsRegex = /(https?:\/\/(?:goo\.gl\/maps|maps\.app\.goo\.gl|www\.google\.com\/maps)[^\s]+)/g;
-            
             let formatted = text.replace(/\n/g, '<br>');
             formatted = formatted.replace(mapsRegex, (url) => {
                 return `<a href="${url}" target="_blank" class="inline-flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg border border-emerald-200 hover:bg-emerald-500 hover:text-white transition-all my-1 text-[10px]">
                     <i class="fas fa-map-marker-alt"></i> Google Maps
                 </a>`;
             });
-            
             return formatted;
         }
 
@@ -347,7 +348,6 @@
 
                     <div class="absolute -top-3 right-2 flex gap-2">
                         <div class="flex bg-white rounded-full shadow-md border border-slate-100 overflow-hidden">
-                            <!-- 加深後的箭頭按鈕 text-slate-700 -->
                             <button onclick="moveDish(${i}, -1)" title="上移" class="w-8 h-8 text-slate-700 hover:bg-slate-50 hover:text-emerald-500 transition-all flex items-center justify-center border-r border-slate-100 disabled:opacity-30" ${i === 0 ? 'disabled' : ''}>
                                 <i class="fas fa-arrow-up text-[10px]"></i>
                             </button>
@@ -482,8 +482,6 @@
                 } else {
                     jsonOutput.innerText = rawJson;
                 }
-            } else {
-                // 一般輸入不重新渲染避免失去游標
             }
             
             syncIndicator.className = "text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded";
