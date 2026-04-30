@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>kk_eat</title>
-    <!-- 新增 Favicon -->
+    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🍴</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
         
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #e2e8f0; /* 較深的灰色背景 */
+            background-color: #e2e8f0;
         }
         .hidden-section { display: none; }
         
@@ -28,10 +28,9 @@
         .recipe-notes-container.expanded {
             max-height: 2000px;
             opacity: 1;
-            transition: max-height 0.5s ease-in, opacity 0.3s ease;
         }
         
-        /* 使用 Grid 佈局並確保項目對齊頂部 */
+        /* Grid 佈局 */
         .dish-grid {
             display: grid;
             gap: 1.5rem;
@@ -45,8 +44,6 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            height: auto;
-            align-self: start; 
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .dish-card:hover {
@@ -68,28 +65,26 @@
             font-family: 'Fira Code', monospace;
             white-space: pre;
             word-wrap: break-word;
-            overflow-x: hidden;
+            outline: none;
         }
         .json-highlight-block {
-            background-color: rgba(255, 255, 255, 0.08); 
-            display: block;
-            width: calc(100% + 2rem);
+            background-color: rgba(16, 185, 129, 0.15); 
+            border-left: 4px solid #10b981;
             margin-left: -1rem;
             padding-left: 1rem;
-            border-left: 4px solid #10b981;
-            transition: background-color 0.3s ease;
+            display: inline-block;
+            width: calc(100% + 1rem);
         }
     </style>
 </head>
 <body class="text-slate-800">
 
-    <!-- 導航欄 -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="text-xl font-black text-emerald-600 flex items-center tracking-tight">
                 <i class="fas fa-utensils mr-2"></i> kk_eat
             </h1>
-            <button id="adminToggle" class="text-xs bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-full transition font-bold text-slate-500 flex items-center gap-1.5 focus:outline-none border border-slate-200">
+            <button id="adminToggle" class="text-xs bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-full transition font-bold text-slate-500 flex items-center gap-1.5 border border-slate-200">
                 <i class="fas fa-cog text-xs text-slate-400"></i> 編輯模式
             </button>
         </div>
@@ -99,10 +94,8 @@
         
         <!-- 日期導航面板 -->
         <div class="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden mb-8">
-            <!-- 上排：日曆與主按鈕 -->
             <div class="p-6 pb-4 flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
-                    <!-- Calendar 字體顏色修正為 text-slate-400 -->
                     <label for="datePicker" class="font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] ml-1">Calendar</label>
                     <input type="date" id="datePicker" class="border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-bold bg-slate-50 text-slate-700 shadow-inner">
                 </div>
@@ -115,15 +108,13 @@
                         <i class="fas fa-chevron-left mr-2"></i> PREV
                     </button>
                     <button id="nextDayBtn" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-4 py-2.5 rounded-xl transition flex items-center text-[10px] font-black shadow-sm tracking-widest">
-                        NEXT <i class="fas fa-chevron-right mr-2"></i>
+                        NEXT <i class="fas fa-chevron-right ml-2"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- 下排：星期快速切換 (MON - SUN) -->
             <div class="px-6 pb-6 pt-2 border-t border-slate-50 bg-slate-50/50">
                 <div class="grid grid-cols-7 gap-2" id="weekBar">
-                    <!-- 星期按鈕邊框加深至 border-slate-300 -->
                     <button onclick="jumpToDayInWeek(1)" data-day="1" class="week-btn py-3 rounded-xl text-[10px] font-black transition-all border border-slate-300">MON</button>
                     <button onclick="jumpToDayInWeek(2)" data-day="2" class="week-btn py-3 rounded-xl text-[10px] font-black transition-all border border-slate-300">TUE</button>
                     <button onclick="jumpToDayInWeek(3)" data-day="3" class="week-btn py-3 rounded-xl text-[10px] font-black transition-all border border-slate-300">WED</button>
@@ -135,57 +126,48 @@
             </div>
         </div>
 
-        <!-- 內容顯示區 -->
         <div id="displaySection">
-            <div id="menuContent" class="dish-grid">
-                <!-- 菜色清單 -->
-            </div>
+            <div id="menuContent" class="dish-grid"></div>
         </div>
 
-        <!-- 管理編輯區 -->
         <div id="adminSection" class="hidden-section mt-12 pt-8 border-t-2 border-slate-300">
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h2 class="text-xl font-black text-slate-800 tracking-tight">管理中心 (<span id="editingDate"></span>)</h2>
-                    <p class="text-xs text-slate-500 font-medium mt-1">在此修改後，複製右方的 JSON 代碼存回 GitHub 檔案即可。</p>
+                    <p class="text-xs text-slate-500 font-medium mt-1">修改後複製 JSON 代碼存回即可。</p>
                 </div>
                 <div class="flex gap-2">
-                    <button id="autoSortBtn" class="text-xs bg-white text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-full transition border border-slate-300 font-bold focus:outline-none">
+                    <button id="autoSortBtn" class="text-xs bg-white text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-full transition border border-slate-300 font-bold">
                         <i class="fas fa-sort-amount-down-alt mr-1 text-slate-400"></i> 分類排序
                     </button>
-                    <button id="closeAdmin" class="text-slate-400 hover:text-slate-600 p-2 transition-transform hover:scale-110 focus:outline-none"><i class="fas fa-times text-xl"></i></button>
+                    <button id="closeAdmin" class="text-slate-400 hover:text-slate-600 p-2 transition-transform hover:scale-110"><i class="fas fa-times text-xl"></i></button>
                 </div>
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- 左側：編輯表單 -->
                 <div class="lg:col-span-2 space-y-6">
-                    <div id="dishEditorList" class="space-y-6">
-                        <!-- 輸入框 -->
-                    </div>
-                    
+                    <div id="dishEditorList" class="space-y-6"></div>
                     <div class="flex gap-3">
-                        <button id="addDishBtn" class="flex-[2] py-5 border-2 border-dashed border-slate-400 rounded-3xl text-slate-500 hover:border-emerald-500 hover:text-emerald-600 transition-all flex items-center justify-center gap-3 font-black bg-white/50 shadow-sm uppercase tracking-widest text-xs focus:outline-none">
+                        <button id="addDishBtn" class="flex-[2] py-5 border-2 border-dashed border-slate-400 rounded-3xl text-slate-500 hover:border-emerald-500 hover:text-emerald-600 transition-all flex items-center justify-center gap-3 font-black bg-white/50 shadow-sm uppercase tracking-widest text-xs">
                             <i class="fas fa-plus-circle text-lg"></i> Add New Dish
                         </button>
-                        <button id="pasteDishBtn" class="hidden flex-1 py-5 bg-orange-50 border-2 border-dashed border-orange-200 rounded-3xl text-orange-600 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center gap-3 font-black uppercase tracking-widest text-xs focus:outline-none">
+                        <button id="pasteDishBtn" class="hidden flex-1 py-5 bg-orange-50 border-2 border-dashed border-orange-200 rounded-3xl text-orange-600 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center gap-3 font-black uppercase tracking-widest text-xs">
                             <i class="fas fa-paste text-lg"></i> Paste
                         </button>
                     </div>
                 </div>
 
-                <!-- 右側：JSON 輸出與雙向編輯 -->
                 <div class="lg:col-span-1">
                     <div class="sticky top-24">
                         <div class="bg-white rounded-[2rem] p-1 shadow-xl border border-slate-300 overflow-hidden">
                             <h3 class="font-bold text-slate-500 p-4 pb-2 flex items-center justify-between text-[10px] uppercase tracking-widest">
                                 JSON Editor
-                                <span id="syncIndicator" class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded transition-all font-mono tracking-tighter normal-case">Auto Sync</span>
+                                <span id="syncIndicator" class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded transition-all font-mono">Auto Sync</span>
                             </h3>
-                            <div id="jsonOutput" contenteditable="plaintext-only" class="w-full h-[550px] bg-slate-900 border-none p-4 text-[11px] font-mono text-emerald-400 shadow-inner overflow-y-auto focus:ring-0 outline-none scroll-smooth" spellcheck="false"></div>
+                            <div id="jsonOutput" contenteditable="plaintext-only" class="w-full h-[550px] bg-slate-900 border-none p-4 text-[11px] font-mono text-emerald-400 shadow-inner overflow-y-auto" spellcheck="false"></div>
                         </div>
                         <div class="mt-4">
-                            <button id="copyJson" class="w-full bg-emerald-600 text-white font-black py-5 rounded-[2rem] hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 flex items-center justify-center gap-3 uppercase tracking-widest text-xs focus:outline-none">
+                            <button id="copyJson" class="w-full bg-emerald-600 text-white font-black py-5 rounded-[2rem] hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
                                 <i class="fas fa-copy text-sm"></i> Copy JSON
                             </button>
                         </div>
@@ -198,6 +180,12 @@
     <div id="toast" class="fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none z-50 text-sm transition-all font-bold border border-slate-700"></div>
 
     <script>
+        // 修正日期解析：避免時區跳日
+        const parseLocalDate = (dateStr) => {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        };
+
         const getLocalDateString = (date = new Date()) => {
             const y = date.getFullYear();
             const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -215,32 +203,12 @@
             '其他': 'fa-utensils'
         };
 
-        const categoryPriority = {
-            '主食': 1,
-            '配菜': 2,
-            '湯品': 3,
-            '甜點': 4,
-            '宵夜': 5,
-            '其他': 6
-        };
+        const categoryPriority = { '主食': 1, '配菜': 2, '湯品': 3, '甜點': 4, '宵夜': 5, '其他': 6 };
 
         let dishClipboard = null;
         let menuData = {
             [todayStr]: [
-                {
-                    "category": "主食",
-                    "name": "白飯",
-                    "ingredients": "白米、水",
-                    "notes": "1. 洗米兩次\n2. 水與米 1:1，並浸泡半小時，外鍋一杯水\n3. 電鍋跳起後悶 20 分鐘",
-                    "isExternal": false
-                },
-                {
-                    "category": "配菜",
-                    "name": "焗烤馬鈴薯",
-                    "ingredients": "馬鈴薯、鮮乳、鮮奶油、胡椒鹽、鮮味炒手、雙色起司絲、水",
-                    "notes": "馬鈴薯蒸熟後壓成泥，拌入其餘食材後鋪上起司，烤箱 200 度烤至金黃。",
-                    "isExternal": true
-                }
+                { "category": "主食", "name": "白飯", "ingredients": "白米", "notes": "洗米兩次，水米1:1", "isExternal": false }
             ]
         };
 
@@ -266,16 +234,12 @@
 
         function performAutoSort(date) {
             if (menuData[date] && Array.isArray(menuData[date])) {
-                menuData[date].sort((a, b) => {
-                    const pA = categoryPriority[a.category] || 99;
-                    const pB = categoryPriority[b.category] || 99;
-                    return pA - pB;
-                });
+                menuData[date].sort((a, b) => (categoryPriority[a.category] || 99) - (categoryPriority[b.category] || 99));
             }
         }
 
         function updateWeekBarStyle(date) {
-            const currentObj = new Date(date);
+            const currentObj = parseLocalDate(date);
             const dayOfWeek = currentObj.getDay(); 
             
             document.querySelectorAll('.week-btn').forEach(btn => {
@@ -289,7 +253,7 @@
         }
 
         window.jumpToDayInWeek = (targetDay) => {
-            const current = new Date(datePicker.value);
+            const current = parseLocalDate(datePicker.value);
             const currentDay = current.getDay(); 
             const currentAdjusted = currentDay === 0 ? 7 : currentDay;
             const targetAdjusted = targetDay === 0 ? 7 : targetDay;
@@ -300,29 +264,18 @@
             renderAll(newDateStr, true);
         };
 
-        function updateTodayBtnStyle(date) {
-            if (date === todayStr) {
-                todayBtn.className = "px-5 py-2.5 rounded-xl font-black transition flex items-center bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-100 text-[10px]";
-            } else {
-                todayBtn.className = "px-5 py-2.5 rounded-xl font-black transition flex items-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-400 shadow-sm text-[10px]";
-            }
-        }
-
         function formatNotesWithLinks(text) {
             if (!text) return "目前尚無內容...";
             const mapsRegex = /(https?:\/\/(?:goo\.gl\/maps|maps\.app\.goo\.gl|www\.google\.com\/maps)[^\s]+)/g;
             let formatted = text.replace(/\n/g, '<br>');
             formatted = formatted.replace(mapsRegex, (url) => {
-                return `<a href="${url}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100/50 text-emerald-700 font-bold rounded-xl border border-emerald-200 hover:bg-emerald-500 hover:text-white transition-all my-1 text-[10px] shadow-sm">
-                    <i class="fas fa-map-marker-alt"></i> Google Maps
-                </a>`;
+                return `<a href="${url}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100/50 text-emerald-700 font-bold rounded-xl border border-emerald-200 hover:bg-emerald-500 hover:text-white transition-all my-1 text-[10px] shadow-sm"><i class="fas fa-map-marker-alt"></i> Google Maps</a>`;
             });
             return formatted;
         }
 
         function renderAll(date, forceHighlight = false) {
             if (!menuData[date]) menuData[date] = [];
-            updateTodayBtnStyle(date);
             updateWeekBarStyle(date);
             renderDisplay(date);
             renderAdmin(date);
@@ -337,37 +290,29 @@
             }
 
             menuContent.innerHTML = dishes.map((dish, i) => {
-                // 加深食材標籤的框線
-                const tagBorderColor = dish.isExternal ? 'border-amber-400' : 'border-green-400';
+                const tagBorderColor = dish.isExternal ? 'border-amber-400' : 'border-green-300';
                 const ingredients = (dish.ingredients || "").split(/[、,，]/).filter(s => s.trim()).map(s => 
                     `<span class="inline-block bg-white text-slate-600 px-3 py-1.5 rounded-xl text-[10px] font-bold mr-1.5 mb-1.5 border ${tagBorderColor} shadow-sm">${s.trim()}</span>`
                 ).join('');
 
-                const externalBadge = dish.isExternal ? 
-                    `<span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[9px] font-black rounded-md flex items-center gap-1 shadow-sm"><i class="fas fa-store"></i>外食</span>` 
-                    : '';
-
-                // 修改：使用真正的淡翠綠色 bg-green-50 並搭配更深的 border-green-300
                 return `
-                <div class="dish-card rounded-[2.5rem] border-2 ${dish.isExternal ? 'bg-amber-100 border-amber-300 shadow-lg shadow-amber-200/20' : 'bg-green-50 border-green-300 shadow-xl shadow-green-200/20'} flex flex-col overflow-hidden animate-in fade-in duration-500">
+                <div class="dish-card rounded-[2.5rem] border-2 ${dish.isExternal ? 'bg-amber-100 border-amber-300' : 'bg-green-50 border-green-300 shadow-xl shadow-green-200/20'} flex flex-col overflow-hidden">
                     <div class="p-8">
                         <div class="flex justify-between items-start mb-5">
-                            <div class="flex items-center">
-                                <span class="text-[9px] font-black uppercase tracking-[0.15em] ${dish.isExternal ? 'text-amber-600 bg-white' : 'text-green-700 bg-white'} px-3 py-1.5 rounded-full shadow-sm border border-transparent">
-                                    <i class="fas ${categoryIcons[dish.category] || 'fa-utensils'} mr-1.5"></i> ${dish.category}
-                                </span>
-                                ${externalBadge}
-                            </div>
+                            <span class="text-[9px] font-black uppercase tracking-[0.15em] ${dish.isExternal ? 'text-amber-600' : 'text-green-700'} bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-100">
+                                <i class="fas ${categoryIcons[dish.category] || 'fa-utensils'} mr-1.5"></i> ${dish.category}
+                            </span>
+                            ${dish.isExternal ? '<span class="px-2 py-0.5 bg-amber-500 text-white text-[9px] font-black rounded flex items-center gap-1 shadow-sm"><i class="fas fa-store"></i>外食</span>' : ''}
                         </div>
-                        <h2 class="text-xl font-black text-slate-800 mb-5 tracking-tight leading-tight">${dish.name || '未命名菜色'}</h2>
+                        <h2 class="text-xl font-black text-slate-800 mb-5 tracking-tight">${dish.name || '未命名菜色'}</h2>
                         <div class="mb-2">
                             <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">${dish.isExternal ? '店家名稱 Shop' : '食材 Ingredients'}</h3>
                             <div class="flex flex-wrap">${ingredients || '<span class="text-slate-400 text-[10px] italic">無資料</span>'}</div>
                         </div>
                     </div>
                     <div class="p-5 ${dish.isExternal ? 'bg-white/40' : 'bg-white/50'} border-t border-slate-100 mt-auto">
-                        <button onclick="toggleNotes(${i})" class="flex items-center justify-between w-full text-xs font-bold ${dish.isExternal ? 'text-amber-700 hover:text-black' : 'text-green-700 hover:text-black'} transition-colors focus:outline-none group">
-                            <span class="flex items-center ml-2"><i class="fas fa-receipt mr-3 opacity-30 group-hover:opacity-100 transition-opacity"></i>${dish.isExternal ? '查看備註' : '查看食譜'}</span>
+                        <button onclick="toggleNotes(${i})" class="flex items-center justify-between w-full text-xs font-bold ${dish.isExternal ? 'text-amber-700' : 'text-green-700'} group">
+                            <span class="flex items-center ml-2"><i class="fas fa-receipt mr-3 opacity-30 group-hover:opacity-100"></i>${dish.isExternal ? '查看備註' : '查看食譜'}</span>
                             <i id="chevron-${i}" class="fas fa-chevron-down transition-transform text-slate-300 mr-2"></i>
                         </button>
                         <div id="notes-${i}" class="recipe-notes-container">
@@ -376,15 +321,13 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                `;
+                </div>`;
             }).join('');
         }
 
         window.toggleNotes = (i) => {
             const el = document.getElementById(`notes-${i}`);
             const ch = document.getElementById(`chevron-${i}`);
-            if (!el) return;
             el.classList.toggle('expanded');
             ch.style.transform = el.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0deg)';
         };
@@ -394,63 +337,48 @@
             document.getElementById('editingDate').innerText = date;
             
             dishEditorList.innerHTML = dishes.map((dish, i) => `
-                <div class="bg-white p-7 rounded-[2rem] border-2 transition-all relative ${dish.isExternal ? 'bg-amber-50/30 border-amber-400 shadow-md' : 'border-slate-200 shadow-sm'}">
-                    
-                    <button onclick="toggleExternal(${i})" title="切換外食模式" class="absolute top-1/2 -left-5 -translate-y-1/2 w-11 h-11 rounded-full border-2 transition-all flex flex-col items-center justify-center gap-0.5 z-10 focus:outline-none ${dish.isExternal ? 'bg-amber-500 border-amber-600 text-white shadow-lg btn-external-active' : 'bg-white border-slate-200 text-slate-400 hover:border-emerald-500 hover:text-emerald-500 shadow-sm'}">
+                <div class="bg-white p-7 rounded-[2rem] border-2 relative ${dish.isExternal ? 'bg-amber-50/30 border-amber-400 shadow-md' : 'border-slate-200 shadow-sm'}">
+                    <button onclick="toggleExternal(${i})" class="absolute top-1/2 -left-5 -translate-y-1/2 w-11 h-11 rounded-full border-2 flex flex-col items-center justify-center z-10 ${dish.isExternal ? 'bg-amber-500 border-amber-600 text-white btn-external-active' : 'bg-white border-slate-200 text-slate-400 hover:text-emerald-500'}">
                         <i class="fas fa-store text-[16px]"></i>
-                        <span class="text-[7px] font-black leading-none uppercase tracking-tighter">${dish.isExternal ? 'OUT' : 'OUT'}</span>
+                        <span class="text-[7px] font-black uppercase">OUT</span>
                     </button>
-
                     <div class="absolute -top-3 right-5 flex gap-2">
                         <div class="flex bg-white rounded-full shadow-md border border-slate-100 overflow-hidden">
-                            <button onclick="moveDish(${i}, -1)" title="上移" class="w-8 h-8 text-slate-700 hover:bg-slate-50 hover:text-emerald-500 transition-all flex items-center justify-center border-r border-slate-100 disabled:opacity-30 focus:outline-none" ${i === 0 ? 'disabled' : ''}>
-                                <i class="fas fa-arrow-up text-[10px]"></i>
-                            </button>
-                            <button onclick="moveDish(${i}, 1)" title="下移" class="w-8 h-8 text-slate-700 hover:bg-slate-50 hover:text-emerald-500 transition-all flex items-center justify-center disabled:opacity-30 focus:outline-none" ${i === dishes.length - 1 ? 'disabled' : ''}>
-                                <i class="fas fa-arrow-down text-[10px]"></i>
-                            </button>
+                            <button onclick="moveDish(${i}, -1)" class="w-8 h-8 text-slate-700 hover:bg-slate-50 flex items-center justify-center border-r" ${i === 0 ? 'disabled' : ''}><i class="fas fa-arrow-up text-[10px]"></i></button>
+                            <button onclick="moveDish(${i}, 1)" class="w-8 h-8 text-slate-700 hover:bg-slate-50 flex items-center justify-center" ${i === dishes.length - 1 ? 'disabled' : ''}><i class="fas fa-arrow-down text-[10px]"></i></button>
                         </div>
-                        <button onclick="copyToClipboard(${i})" title="複製此菜色" class="w-8 h-8 bg-emerald-500 text-white rounded-full shadow-md hover:bg-emerald-600 transition-all flex items-center justify-center focus:outline-none">
-                            <i class="fas fa-copy text-xs"></i>
-                        </button>
-                        <button onclick="removeDish(${i})" title="刪除" class="w-8 h-8 bg-white border border-red-100 text-red-400 rounded-full shadow-md hover:bg-red-500 hover:text-white transition-all flex items-center justify-center focus:outline-none">
-                            <i class="fas fa-trash-alt text-xs"></i>
-                        </button>
+                        <button onclick="copyToClipboard(${i})" class="w-8 h-8 bg-emerald-500 text-white rounded-full shadow-md hover:bg-emerald-600 flex items-center justify-center"><i class="fas fa-copy text-xs"></i></button>
+                        <button onclick="removeDish(${i})" class="w-8 h-8 bg-white border border-red-100 text-red-400 rounded-full shadow-md hover:bg-red-500 hover:text-white flex items-center justify-center"><i class="fas fa-trash-alt text-xs"></i></button>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
                         <div class="md:col-span-1">
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Category</label>
-                            <select onchange="syncDish(${i}, 'category', this.value)" class="w-full border border-slate-100 bg-slate-50 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2">Category</label>
+                            <select onchange="syncDish(${i}, 'category', this.value)" class="w-full border border-slate-100 bg-slate-50 rounded-xl px-3 py-2.5 text-sm font-bold">
                                 ${Object.keys(categoryIcons).map(c => `<option value="${c}" ${dish.category === c ? 'selected' : ''}>${c}</option>`).join('')}
                             </select>
                         </div>
                         <div class="md:col-span-3">
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Name</label>
-                            <input type="text" value="${dish.name || ''}" oninput="syncDish(${i}, 'name', this.value)" placeholder="請輸入菜名..." class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2">Name</label>
+                            <input type="text" value="${dish.name || ''}" oninput="syncDish(${i}, 'name', this.value)" class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-sm font-bold">
                         </div>
                         <div class="md:col-span-4">
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">${dish.isExternal ? '店家名稱 Shop' : '食材 Ingredients'}</label>
-                            <input type="text" value="${dish.ingredients || ''}" oninput="syncDish(${i}, 'ingredients', this.value)" placeholder="${dish.isExternal ? '請輸入店名...' : '雞蛋、胡蘿蔔......'}" class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-600">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2">${dish.isExternal ? '店家名稱 Shop' : '食材 Ingredients'}</label>
+                            <input type="text" value="${dish.ingredients || ''}" oninput="syncDish(${i}, 'ingredients', this.value)" class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-2.5 text-sm">
                         </div>
                         <div class="md:col-span-4">
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">${dish.isExternal ? '備註 Notes' : '食譜 Recipe'}</label>
-                            <textarea oninput="syncDish(${i}, 'notes', this.value)" rows="3" placeholder="${dish.isExternal ? '店家資訊、餐點心得或價格...' : '詳細步驟...'}" class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-600">${dish.notes || ''}</textarea>
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2">${dish.isExternal ? '備註 Notes' : '食譜 Recipe'}</label>
+                            <textarea oninput="syncDish(${i}, 'notes', this.value)" rows="3" class="w-full border border-slate-100 bg-slate-50 rounded-xl px-4 py-3 text-sm">${dish.notes || ''}</textarea>
                         </div>
                     </div>
                 </div>
             `).join('');
 
-            if (dishes.length === 0) {
-                dishEditorList.innerHTML = `<div class="text-center py-12 bg-slate-100/50 rounded-[2rem] border-2 border-dashed border-slate-200 text-slate-400 text-xs italic font-medium uppercase tracking-widest shadow-inner">No dishes here yet.</div>`;
-            }
-
-            const pasteBtn = document.getElementById('pasteDishBtn');
-            pasteBtn.classList.toggle('hidden', !dishClipboard);
+            if (dishes.length === 0) dishEditorList.innerHTML = `<div class="text-center py-12 bg-slate-100/50 rounded-[2rem] border-2 border-dashed border-slate-200 text-slate-400 text-xs italic uppercase tracking-widest shadow-inner">No dishes here yet.</div>`;
+            document.getElementById('pasteDishBtn').classList.toggle('hidden', !dishClipboard);
         }
 
         window.toggleExternal = (index) => {
             const date = datePicker.value;
-            if (!menuData[date] || !menuData[date][index]) return;
             menuData[date][index].isExternal = !menuData[date][index].isExternal;
             renderAll(date, false);
             showToast(menuData[date][index].isExternal ? "已標記為外食" : "已改為自煮模式");
@@ -459,9 +387,7 @@
         window.moveDish = (index, direction) => {
             const date = datePicker.value;
             const dishes = menuData[date];
-            const newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= dishes.length) return;
-            [dishes[index], dishes[newIndex]] = [dishes[newIndex], dishes[index]];
+            [dishes[index], dishes[index + direction]] = [dishes[index + direction], dishes[index]];
             renderAll(date, false);
         };
 
@@ -469,14 +395,13 @@
             const date = datePicker.value;
             performAutoSort(date);
             renderAll(date, true);
-            showToast("已按主食到甜點順序自動排列");
+            showToast("已按順序自動排列");
         });
 
         window.copyToClipboard = (index) => {
-            const date = datePicker.value;
-            dishClipboard = JSON.parse(JSON.stringify(menuData[date][index]));
-            showToast("菜色已暫存，點擊「貼上」即可重複使用");
-            renderAdmin(date);
+            dishClipboard = JSON.parse(JSON.stringify(menuData[datePicker.value][index]));
+            showToast("菜色已暫存");
+            renderAdmin(datePicker.value);
         };
 
         document.getElementById('pasteDishBtn').addEventListener('click', () => {
@@ -484,23 +409,21 @@
             const date = datePicker.value;
             if (!menuData[date]) menuData[date] = [];
             menuData[date].push(JSON.parse(JSON.stringify(dishClipboard)));
-            showToast("貼上成功！");
             renderAll(date, true);
+            showToast("貼上成功！");
         });
 
         window.syncDish = (index, field, value) => {
             const date = datePicker.value;
-            if (!menuData[date] || !menuData[date][index]) return;
             menuData[date][index][field] = value;
             renderDisplay(date);
             updateJsonOutput(false);
         };
 
         window.removeDish = (index) => {
-            const date = datePicker.value;
-            if (confirm("確定要刪除這道菜嗎？")) {
-                menuData[date].splice(index, 1);
-                renderAll(date, true);
+            if (confirm("確定要刪除嗎？")) {
+                menuData[datePicker.value].splice(index, 1);
+                renderAll(datePicker.value, true);
             }
         };
 
@@ -512,55 +435,67 @@
         });
 
         function updateJsonOutput(forceHighlight = false) {
-            const sortedKeys = Object.keys(menuData).sort();
             const sortedMenuData = {};
-            sortedKeys.forEach(key => {
-                sortedMenuData[key] = menuData[key];
-            });
+            Object.keys(menuData).sort().forEach(key => { sortedMenuData[key] = menuData[key]; });
             
             const rawJson = JSON.stringify(sortedMenuData, null, 4);
             
             if (forceHighlight) {
                 const targetDate = datePicker.value;
                 let safeJson = rawJson.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                const datePattern = new RegExp(`("${targetDate}": \\[[\\s\\S]*?\\n    \\](,?))`, 'g');
                 
-                if (safeJson.includes(`"${targetDate}": [`)) {
+                // 強健的高亮 Regex：相容空陣列 [] 與不同的縮排
+                const datePattern = new RegExp(`("${targetDate}":\\s*\\[[\\s\\S]*?\\n\\s*\\])`, 'g');
+                
+                if (safeJson.match(datePattern)) {
                     safeJson = safeJson.replace(datePattern, '<span id="highlighted-json-block" class="json-highlight-block">$1</span>');
                     jsonOutput.innerHTML = safeJson;
+                    
+                    // 自動滾動到高亮區塊
+                    setTimeout(() => {
+                        const el = document.getElementById('highlighted-json-block');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
                 } else {
+                    jsonOutput.innerText = rawJson;
+                }
+            } else {
+                // 如果只是同步內容，不重新渲染 HTML 避免失去焦點
+                if (document.activeElement !== jsonOutput) {
                     jsonOutput.innerText = rawJson;
                 }
             }
             
-            syncIndicator.className = "text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded font-bold tracking-tighter shadow-sm";
+            syncIndicator.className = "text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded font-bold shadow-sm";
             syncIndicator.innerText = "Auto Sync";
         }
 
-        jsonOutput.addEventListener('input', (e) => {
+        jsonOutput.addEventListener('input', () => {
             try {
                 const newData = JSON.parse(jsonOutput.innerText);
                 menuData = newData;
-                syncIndicator.className = "text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded font-bold tracking-tighter shadow-sm";
+                syncIndicator.className = "text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded font-bold";
                 syncIndicator.innerText = "JSON Updated";
-                const date = datePicker.value;
-                renderDisplay(date);
-                renderAdmin(date);
+                renderDisplay(datePicker.value);
+                renderAdmin(datePicker.value);
             } catch (err) {
-                syncIndicator.className = "text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold tracking-tighter shadow-sm";
+                syncIndicator.className = "text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold";
                 syncIndicator.innerText = "Invalid JSON";
             }
         });
 
-        function modifyDate(days) {
-            const current = new Date(datePicker.value);
-            current.setDate(current.getDate() + days);
+        document.getElementById('prevDayBtn').addEventListener('click', () => {
+            const current = parseLocalDate(datePicker.value);
+            current.setDate(current.getDate() - 1);
             datePicker.value = getLocalDateString(current);
             renderAll(datePicker.value, true);
-        }
-
-        document.getElementById('prevDayBtn').addEventListener('click', () => modifyDate(-1));
-        document.getElementById('nextDayBtn').addEventListener('click', () => modifyDate(1));
+        });
+        document.getElementById('nextDayBtn').addEventListener('click', () => {
+            const current = parseLocalDate(datePicker.value);
+            current.setDate(current.getDate() + 1);
+            datePicker.value = getLocalDateString(current);
+            renderAll(datePicker.value, true);
+        });
         document.getElementById('todayBtn').addEventListener('click', () => {
             datePicker.value = todayStr;
             renderAll(todayStr, true);
@@ -575,30 +510,23 @@
                 admin.scrollIntoView({ behavior: 'smooth' });
             }
         });
-        document.getElementById('closeAdmin').addEventListener('click', () => {
-            document.getElementById('adminSection').classList.add('hidden-section');
-        });
+        document.getElementById('closeAdmin').addEventListener('click', () => document.getElementById('adminSection').classList.add('hidden-section'));
 
         document.getElementById('copyJson').addEventListener('click', () => {
-            const selection = window.getSelection();
-            const range = document.createRange();
-            range.selectNodeContents(jsonOutput);
-            selection.removeAllRanges();
-            selection.addRange(range);
-            
-            try {
-                document.execCommand('copy');
-                showToast("JSON 代碼已按日期排序並複製成功！");
-            } catch (e) {
-                showToast("複製失敗，請手動全選複製");
-            }
-            selection.removeAllRanges();
+            const text = jsonOutput.innerText;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast("JSON 已複製成功！");
         });
 
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.innerText = msg;
-            t.className = `fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl opacity-100 z-50 transition-all pointer-events-auto font-bold border border-slate-700`;
+            t.className = `fixed bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl opacity-100 z-50 transition-all font-bold border border-slate-700`;
             setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2500);
         }
 
