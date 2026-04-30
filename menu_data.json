@@ -79,9 +79,9 @@
         },
         {
             "category": "配菜",
-            "name": "煎豆皮",
-            "ingredients": "豆皮、大豆沙拉油",
-            "notes": "",
+            "name": "川燙地瓜葉",
+            "ingredients": "地瓜葉、芝麻油、醬料",
+            "notes": "1. 川燙地瓜葉\n2. 淋上芝麻油",
             "isExternal": false
         },
         {
@@ -92,6 +92,28 @@
             "isExternal": true
         }
     ],
-    "2026-05-01": [],
+    "2026-05-01": [
+        {
+            "category": "主食",
+            "name": "白飯",
+            "ingredients": "白米、水",
+            "notes": "1. 洗米兩次\n2. 水與米1:1，並浸泡半小時，外鍋一杯水\n3. 電鍋跳起後悶20分鐘",
+            "isExternal": false
+        },
+        {
+            "category": "配菜",
+            "name": "胡蘿蔔炒豆包",
+            "ingredients": "胡蘿蔔、豆皮、大豆沙拉油",
+            "notes": "1. 胡蘿蔔切絲，豆包切條\n2. 炒在一起",
+            "isExternal": false
+        },
+        {
+            "category": "甜點",
+            "name": "蜂蜜蛋糕",
+            "ingredients": "Lopia",
+            "notes": "https://maps.app.goo.gl/nWUPns3Nk89vJ8qD6",
+            "isExternal": true
+        }
+    ],
     "2026-05-02": []
 }
