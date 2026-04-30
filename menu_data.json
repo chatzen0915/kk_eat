@@ -1,7 +1,6 @@
 {
     "2026-04-27": [],
-    
-"2026-04-28": [
+    "2026-04-28": [
         {
             "category": "主食",
             "name": "白飯",
@@ -21,14 +20,13 @@
             "notes": "1. 將冷凍薯條鋪在烘焙紙上，放入氣炸鍋\n2. 氣炸200度12分鐘"
         },
         {
-            "category": "主食",
-            "name": "",
-            "ingredients": "",
-            "notes": "",
-            "isExternal": false
+            "category": "甜點",
+            "name": "千層蛋糕",
+            "ingredients": "Lopia",
+            "notes": "https://maps.app.goo.gl/nWUPns3Nk89vJ8qD6",
+            "isExternal": true
         }
     ],
-
     "2026-04-29": [
         {
             "category": "主食",
@@ -56,7 +54,8 @@
             "isExternal": true
         }
     ],
-    "2026-04-30": [
+    
+"2026-04-30": [
         {
             "category": "主食",
             "name": "白飯",
@@ -76,7 +75,15 @@
             "ingredients": "蘆筍、洋菇、大豆沙拉油",
             "notes": "1. 蘆筍斜切、洋菇切片\n2. 先將洋菇下鍋，炒至金黃色後將蘆筍一同下鍋。",
             "isExternal": false
+        },
+        {
+            "category": "配菜",
+            "name": "煎豆皮",
+            "ingredients": "豆皮、大豆沙拉油",
+            "notes": "",
+            "isExternal": false
         }
     ],
+
     "2026-05-01": []
 }
