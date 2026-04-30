@@ -8,6 +8,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+        
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #f8fafc;
@@ -35,7 +37,7 @@
         @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
         
         .dish-card {
-            break-inside: avoid; /* 防止卡片被欄位切斷 */
+            break-inside: avoid;
             margin-bottom: 1.5rem;
             display: inline-block;
             width: 100%;
@@ -49,6 +51,23 @@
             0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
             70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
             100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+
+        /* JSON 編輯器樣式 */
+        #jsonOutput {
+            font-family: 'Fira Code', monospace;
+            white-space: pre;
+            word-wrap: break-word;
+            overflow-x: hidden;
+        }
+        .json-highlight-block {
+            background-color: rgba(16, 185, 129, 0.25); /* 翡翠綠透明底 */
+            display: block;
+            width: calc(100% + 2rem);
+            margin-left: -1rem;
+            padding-left: 1rem;
+            border-left: 4px solid #10b981;
+            transition: background-color 0.3s ease;
         }
     </style>
 </head>
@@ -71,14 +90,13 @@
         <!-- 日期導航 -->
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-8 flex flex-wrap items-center justify-between gap-4 border border-slate-100">
             <div class="flex items-center gap-2">
-                <button id="prevDayBtn" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-2 rounded-lg transition flex items-center">
+                <button id="prevDayBtn" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-2 rounded-lg transition flex items-center text-sm">
                     <i class="fas fa-chevron-left mr-1"></i> 前一天
                 </button>
-                <!-- 初始移除 bg-emerald-500，交由 JS 控制動態樣式 -->
-                <button id="todayBtn" class="px-4 py-2 rounded-lg font-medium transition flex items-center">
+                <button id="todayBtn" class="px-4 py-2 rounded-lg font-medium transition flex items-center text-sm">
                     今天
                 </button>
-                <button id="nextDayBtn" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-2 rounded-lg transition flex items-center">
+                <button id="nextDayBtn" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-2 rounded-lg transition flex items-center text-sm">
                     後一天 <i class="fas fa-chevron-right ml-1"></i>
                 </button>
             </div>
@@ -103,7 +121,7 @@
                     <p class="text-sm text-slate-400">在此修改後，複製下方的 JSON 代碼存回檔案即可。</p>
                 </div>
                 <div class="flex gap-2">
-                    <button id="autoSortBtn" class="text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-full transition border border-slate-200">
+                    <button id="autoSortBtn" class="text-xs bg-white text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-full transition border border-slate-200">
                         <i class="fas fa-sort-amount-down-alt mr-1"></i> 按預設分類排序
                     </button>
                     <button id="closeAdmin" class="text-slate-400 hover:text-slate-600 p-2"><i class="fas fa-times text-xl"></i></button>
@@ -118,7 +136,7 @@
                     </div>
                     
                     <div class="flex gap-3">
-                        <button id="addDishBtn" class="flex-[2] py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center gap-2">
+                        <button id="addDishBtn" class="flex-[2] py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 hover:border-emerald-500 hover:text-emerald-500 transition-all flex items-center justify-center gap-2 font-bold">
                             <i class="fas fa-plus-circle"></i> 新增一道菜色
                         </button>
                         <button id="pasteDishBtn" class="hidden flex-1 py-4 bg-orange-50 border-2 border-dashed border-orange-200 rounded-2xl text-orange-500 hover:bg-orange-100 hover:border-orange-400 transition-all flex items-center justify-center gap-2 font-bold">
@@ -132,12 +150,13 @@
                     <div class="sticky top-24">
                         <h3 class="font-bold text-slate-600 mb-4 flex items-center justify-between text-sm">
                             雙向編輯 JSON
-                            <span id="syncIndicator" class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded transition-all">Auto Sync</span>
+                            <span id="syncIndicator" class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded transition-all font-mono tracking-tighter">Auto Sync</span>
                         </h3>
-                        <textarea id="jsonOutput" class="w-full h-[500px] bg-slate-900 border border-slate-800 rounded-2xl p-4 text-[11px] font-mono text-emerald-400 shadow-inner resize-none focus:ring-2 focus:ring-emerald-500 outline-none" spellcheck="false"></textarea>
+                        <!-- 將 textarea 改為 contenteditable div 以支援高亮底色 -->
+                        <div id="jsonOutput" contenteditable="plaintext-only" class="w-full h-[550px] bg-slate-900 border border-slate-800 rounded-2xl p-4 text-[11px] font-mono text-emerald-400 shadow-inner overflow-y-auto focus:ring-2 focus:ring-emerald-500 outline-none scroll-smooth" spellcheck="false"></div>
                         <div class="flex gap-2 mt-4">
                             <button id="copyJson" class="flex-1 bg-emerald-600 text-white font-bold py-4 rounded-2xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 flex items-center justify-center">
-                                <i class="fas fa-copy mr-2"></i> 複製代碼
+                                <i class="fas fa-copy mr-2"></i> 複製全部 JSON
                             </button>
                         </div>
                     </div>
@@ -146,7 +165,6 @@
         </div>
     </main>
 
-    <!-- 已將 toast 移至右下角 (bottom-8 right-8) -->
     <div id="toast" class="fixed bottom-8 right-8 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none z-50 text-sm transition-all"></div>
 
     <script>
@@ -177,8 +195,6 @@
         };
 
         let dishClipboard = null;
-
-        // 預設範例資料
         let menuData = {
             [todayStr]: [
                 {
@@ -215,7 +231,7 @@
                     menuData = { ...menuData, ...fetchedData };
                 }
             } catch (e) { console.warn("使用預設範例。"); }
-            renderAll(datePicker.value);
+            renderAll(datePicker.value, true);
         }
 
         function performAutoSort(date) {
@@ -228,7 +244,6 @@
             }
         }
 
-        // 更新「今天」按鈕樣式
         function updateTodayBtnStyle(date) {
             if (date === todayStr) {
                 todayBtn.className = "px-4 py-2 rounded-lg font-medium transition flex items-center bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-100";
@@ -237,13 +252,14 @@
             }
         }
 
-        function renderAll(date) {
+        // 修改 renderAll：新增 forceHighlight 參數，用於控制是否需要重新渲染 JSON 高亮與捲動
+        function renderAll(date, forceHighlight = false) {
             if (!menuData[date]) menuData[date] = [];
             
             updateTodayBtnStyle(date);
             renderDisplay(date);
             renderAdmin(date);
-            updateJsonOutput();
+            updateJsonOutput(forceHighlight);
         }
 
         function renderDisplay(date) {
@@ -267,13 +283,13 @@
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center">
-                                <span class="text-[10px] font-black uppercase tracking-widest ${dish.isExternal ? 'text-amber-600 bg-amber-50' : 'text-emerald-500 bg-emerald-50'} px-2 py-1 rounded">
+                                <span class="text-[10px] font-black uppercase tracking-widest ${dish.isExternal ? 'text-amber-600 bg-amber-50' : 'text-emerald-500 bg-emerald-50'} px-2 py-1 rounded font-mono">
                                     <i class="fas ${categoryIcons[dish.category] || 'fa-utensils'} mr-1"></i> ${dish.category}
                                 </span>
                                 ${externalBadge}
                             </div>
                         </div>
-                        <h2 class="text-xl font-black text-slate-800 mb-4">${dish.name || '未命名菜色'}</h2>
+                        <h2 class="text-xl font-black text-slate-800 mb-4 tracking-tight">${dish.name || '未命名菜色'}</h2>
                         <div class="mb-2">
                             <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">${dish.isExternal ? '店家名稱' : '食材'}</h3>
                             <div class="flex flex-wrap">${ingredients || '<span class="text-slate-300 text-xs italic">無資料</span>'}</div>
@@ -366,7 +382,7 @@
             const date = datePicker.value;
             if (!menuData[date] || !menuData[date][index]) return;
             menuData[date][index].isExternal = !menuData[date][index].isExternal;
-            renderAll(date);
+            renderAll(date, false);
             showToast(menuData[date][index].isExternal ? "已標記為外食" : "已改為自煮模式");
         };
 
@@ -376,20 +392,20 @@
             const newIndex = index + direction;
             if (newIndex < 0 || newIndex >= dishes.length) return;
             [dishes[index], dishes[newIndex]] = [dishes[newIndex], dishes[index]];
-            renderAll(date);
+            renderAll(date, false);
         };
 
         document.getElementById('autoSortBtn').addEventListener('click', () => {
             const date = datePicker.value;
             performAutoSort(date);
-            renderAll(date);
+            renderAll(date, true);
             showToast("已按主食到甜點順序自動排列");
         });
 
         window.copyToClipboard = (index) => {
             const date = datePicker.value;
             dishClipboard = JSON.parse(JSON.stringify(menuData[date][index]));
-            showToast("菜色已暫存，點擊下方「貼上菜色」按鈕即可重複使用");
+            showToast("菜色已暫存，點擊「貼上」即可重複使用");
             renderAdmin(date);
         };
 
@@ -399,7 +415,7 @@
             if (!menuData[date]) menuData[date] = [];
             menuData[date].push(JSON.parse(JSON.stringify(dishClipboard)));
             showToast("貼上成功！");
-            renderAll(date);
+            renderAll(date, true);
         });
 
         window.syncDish = (index, field, value) => {
@@ -407,14 +423,14 @@
             if (!menuData[date] || !menuData[date][index]) return;
             menuData[date][index][field] = value;
             renderDisplay(date);
-            updateJsonOutput();
+            updateJsonOutput(false); // 正在輸入時不重新高亮避免干擾
         };
 
         window.removeDish = (index) => {
             const date = datePicker.value;
             if (confirm("確定要刪除這道菜嗎？")) {
                 menuData[date].splice(index, 1);
-                renderAll(date);
+                renderAll(date, true);
             }
         };
 
@@ -422,28 +438,66 @@
             const date = datePicker.value;
             if (!menuData[date]) menuData[date] = [];
             menuData[date].push({ category: '主食', name: '', ingredients: '', notes: '', isExternal: false });
-            renderAll(date);
+            renderAll(date, true);
         });
 
-        function updateJsonOutput() {
-            // 自動按日期排序輸出 JSON
+        // 升級 updateJsonOutput 以支援智慧高亮與捲動
+        function updateJsonOutput(forceHighlight = false) {
             const sortedKeys = Object.keys(menuData).sort();
             const sortedMenuData = {};
             sortedKeys.forEach(key => {
                 sortedMenuData[key] = menuData[key];
             });
             
-            jsonOutput.value = JSON.stringify(sortedMenuData, null, 4);
+            const rawJson = JSON.stringify(sortedMenuData, null, 4);
+            
+            if (forceHighlight) {
+                const targetDate = datePicker.value;
+                // 逃逸 HTML
+                let safeJson = rawJson.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                
+                // 使用 Regex 定位日期區塊並包裹高亮樣式
+                // 匹配日期鍵值到該陣列結束的區段
+                const datePattern = new RegExp(`("${targetDate}": \\[[\\s\\S]*?\\n    \\](,?))`, 'g');
+                
+                if (safeJson.includes(`"${targetDate}": [`)) {
+                    safeJson = safeJson.replace(datePattern, '<span id="highlighted-json-block" class="json-highlight-block">$1</span>');
+                    jsonOutput.innerHTML = safeJson;
+                    
+                    // 平滑捲動到該區塊
+                    setTimeout(() => {
+                        const target = document.getElementById('highlighted-json-block');
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 50);
+                } else {
+                    jsonOutput.innerText = rawJson;
+                }
+            } else {
+                // 如果只是正在輸入，則僅更新 textContent 以保持性能且不干擾游標
+                // 只有當 content 為空或資料被清空時才更新整個 innerText
+                if (jsonOutput.innerText !== rawJson) {
+                    // 注意：直接設定 innerText 會丟失高亮，但在編輯左側表單時這是可接受的折衷
+                    // 若需要維持高亮則需更複雜的 DOM 樹比對
+                }
+                // 保險起見，若非 forceHighlight 則不操作 DOM，避免游標跳動
+            }
+            
             syncIndicator.className = "text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded";
             syncIndicator.innerText = "Auto Sync";
         }
 
+        // 監聽 JSON 編輯區輸入 (雙向綁定)
         jsonOutput.addEventListener('input', (e) => {
             try {
-                const newData = JSON.parse(e.target.value);
+                // 讀取純文字內容並解析
+                const newData = JSON.parse(jsonOutput.innerText);
                 menuData = newData;
                 syncIndicator.className = "text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded";
                 syncIndicator.innerText = "JSON Updated";
+                
+                // 同步更新顯示區與管理區，但不重新觸發右側高亮（避免打字中斷）
                 const date = datePicker.value;
                 renderDisplay(date);
                 renderAdmin(date);
@@ -457,21 +511,22 @@
             const current = new Date(datePicker.value);
             current.setDate(current.getDate() + days);
             datePicker.value = getLocalDateString(current);
-            renderAll(datePicker.value);
+            renderAll(datePicker.value, true);
         }
 
         document.getElementById('prevDayBtn').addEventListener('click', () => modifyDate(-1));
         document.getElementById('nextDayBtn').addEventListener('click', () => modifyDate(1));
         document.getElementById('todayBtn').addEventListener('click', () => {
             datePicker.value = todayStr;
-            renderAll(todayStr);
+            renderAll(todayStr, true);
         });
-        datePicker.addEventListener('change', () => renderAll(datePicker.value));
+        datePicker.addEventListener('change', () => renderAll(datePicker.value, true));
 
         document.getElementById('adminToggle').addEventListener('click', () => {
             const admin = document.getElementById('adminSection');
             admin.classList.toggle('hidden-section');
             if (!admin.classList.contains('hidden-section')) {
+                renderAll(datePicker.value, true);
                 admin.scrollIntoView({ behavior: 'smooth' });
             }
         });
@@ -480,15 +535,26 @@
         });
 
         document.getElementById('copyJson').addEventListener('click', () => {
-            jsonOutput.select();
-            document.execCommand('copy');
-            showToast("JSON 代碼已按日期排序並複製成功！");
+            // 複製時使用目前的內容（確保日期已排序）
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(jsonOutput);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            try {
+                document.execCommand('copy');
+                showToast("JSON 代碼已按日期排序並複製成功！");
+            } catch (e) {
+                showToast("複製失敗，請手動全選複製");
+            }
+            selection.removeAllRanges();
         });
 
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.innerText = msg;
-            t.className = `fixed bottom-8 right-8 bg-emerald-600 text-white px-6 py-3 rounded-full shadow-2xl opacity-100 z-50 transition-all pointer-events-auto`;
+            t.className = `fixed bottom-8 right-8 bg-emerald-600 text-white px-6 py-3 rounded-full shadow-2xl opacity-100 z-50 transition-all pointer-events-auto font-bold`;
             setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2500);
         }
 
